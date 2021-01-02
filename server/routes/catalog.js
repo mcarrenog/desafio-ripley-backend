@@ -88,6 +88,7 @@ app.put('/product/:id', function(req, res) {
 
 
         res.json({
+            status: true,
             productDB
         });
 
