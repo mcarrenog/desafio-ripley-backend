@@ -1,5 +1,6 @@
 require('./config/config');
 
+const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -7,37 +8,20 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.get('/producto', function(req, res) {
-    res.json('Get producto');
-});
+app.use(require('./routes/catalog'));
 
-app.post('/producto', function(req, res) {
+mongoose.connect(process.env.URL_DB, {
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+    useUnifiedTopology: true
+}, (err) => {
+    if (err) {
+        throw err;
 
-    let body = req.body;
-
-    if (body.nombre === undefined) {
-        res.status(400).json({
-            ok: false,
-            msj: 'El nombre de producto es un campo obligatorio'
-        });
-    } else {
-        res.json({
-            producto: body
-        });
     }
-});
+    console.log('Base de Datos online');
 
-app.put('/producto/:id', function(req, res) {
-
-    let id = req.params.id;
-
-    res.json({
-        id
-    });
-});
-
-app.delete('/producto', function(req, res) {
-    res.json('Delete producto');
 });
 
 app.listen(process.env.PORT, () => {
