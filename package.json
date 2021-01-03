@@ -10,8 +10,10 @@
     "author": "Mauricio Carreño",
     "license": "ISC",
     "dependencies": {
+        "@elastic/elasticsearch": "^7.10.0",
         "body-parser": "^1.19.0",
         "express": "^4.17.1",
+        "mongoosastic": "^4.6.0",
         "mongoose": "^5.11.9",
         "mongoose-unique-validator": "^2.0.3",
         "underscore": "^1.12.0"

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
+const mongoosastic = require('mongoosastic');
 
 let Schema = mongoose.Schema;
 
@@ -12,7 +13,8 @@ let productSchema = new Schema({
     },
     marca: {
         type: String,
-        required: [true, 'El campo Marca es obligatorio']
+        required: [true, 'El campo Marca es obligatorio'],
+        es_indexed: true
     },
     imagen: {
         type: String,
@@ -21,10 +23,12 @@ let productSchema = new Schema({
     nombre: {
         type: String,
         required: [true, 'El campo Nombre es obligatorio']
+
     },
     descripcion: {
         type: String,
-        required: [true, 'El campo Descripcion es obligatorio']
+        required: [true, 'El campo Descripcion es obligatorio'],
+        es_indexed: true
     },
     precio: {
         type: Number,
@@ -36,5 +40,7 @@ let productSchema = new Schema({
 productSchema.plugin(uniqueValidator, {
     message: '{PATH} debe ser único'
 });
+
+productSchema.plugin(mongoosastic);
 
 module.exports = mongoose.model('Product', productSchema);

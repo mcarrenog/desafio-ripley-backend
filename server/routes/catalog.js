@@ -2,7 +2,12 @@ const express = require('express');
 const Product = require('../models/product');
 const _ = require('underscore');
 
+const { Client } = require('@elastic/elasticsearch');
+const client = new Client({ node: 'http://localhost:9200' });
+
 const app = express();
+
+
 
 
 //Get Method (Get all Products)
@@ -10,6 +15,61 @@ app.get('/product', function(req, res) {
 
     let from = req.query.from || 0;
     let limit = req.query.limit || 5;
+
+    from = Number(from);
+    limit = Number(limit);
+
+    Product.search({
+        query_string: {
+            query: "Play"
+        }
+    }, function(err, results) {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        res.json({
+            status: true,
+            results
+        });
+
+    });
+
+    /*Product.find({}, ' id nombre descripcion marca precio imagen')
+        .limit(limit)
+        .skip(from)
+        .exec((err, products) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+
+            Product.countDocuments({}, (err, count) => {
+
+                res.json({
+                    status: true,
+                    products,
+                    count
+                })
+            })
+
+        });
+        */
+
+});
+
+//Get Method (Get all Products)
+app.get('/findProducts', function(req, res) {
+
+    let from = req.query.from || 0;
+    let limit = req.query.limit || 5;
+    let keyword = req.query.keyword || '';
 
     from = Number(from);
     limit = Number(limit);
@@ -31,8 +91,8 @@ app.get('/product', function(req, res) {
                     status: true,
                     products,
                     count
-                })
-            })
+                });
+            });
 
         });
 });
@@ -92,7 +152,7 @@ app.put('/product/:id', function(req, res) {
             productDB
         });
 
-    })
+    });
 
 
 });
@@ -120,7 +180,7 @@ app.delete('/product/:id', function(req, res) {
         res.json({
             status: true,
             product: productDeleted
-        })
+        });
     });
 
 
