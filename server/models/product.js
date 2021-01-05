@@ -39,11 +39,6 @@ let productSchema = new Schema({
         type: Number,
         required: [true, 'El campo Precio es obligatorio'],
         es_indexed: true
-    },
-    precioDescuento: {
-        type: Number,
-        required: [false],
-        es_indexed: true
     }
 
 });

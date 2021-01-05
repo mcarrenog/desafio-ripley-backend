@@ -92,27 +92,15 @@ app.get('/products', function (req, res) {
                         let { precio: price } = _source;
                         console.log();
                         price = (price) - (price * 0.2);
-                        element.precioDescuento = price;
+                        _source.precioDescuento = price;
                         
-                        results.hits.hits[i].precioDescuento = price;
-                        console.log(results.hits.hits[i]);
+                     //   results.hits.hits[i].precioDescuento = price;
+                        
                        
                     }
                 });
 
-                // let precio  = !applyDiscount ? results.hits.hits[0] :  results.hits.hits[0].precio - (results.hits.hits[0].precio * 0.2);
-                // results.hits.hits[0].precioDescuento = precio;
-
-                // console.log(results.hits.hits);
-                // console.log(precio);
-                // console.log(applyDiscount);
-                /*if (applyDiscount) {
-                    let { precio } = results.hits.hits[0];
-                    precio = (precio) - (precio * 0.2);
-                    results.hits.hits[0].precioDescuento = precio;
-                    console.log(precio);
-                    console.log(results.hits.hits);
-                }*/
+             
 
                 res.json({
                     status: true,
@@ -122,63 +110,10 @@ app.get('/products', function (req, res) {
             });
     }
 
-    /*Product.find({}, ' id nombre descripcion marca precio imagen')
-        .limit(limit)
-        .skip(from)
-        .exec((err, products) => {
-            if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    err
-                });
-            }
-
-            Product.countDocuments({}, (err, count) => {
-
-                res.json({
-                    status: true,
-                    products,
-                    count
-                })
-            })
-
-        });
-        */
+   
 
 });
 
-//Get Method (Get all Products)
-app.get('/findProducts', function (req, res) {
-
-    let from = req.query.from || 0;
-    let limit = req.query.limit || 5;
-    let keyword = req.query.keyword || '';
-
-    from = Number(from);
-    limit = Number(limit);
-
-    Product.find({}, ' id nombre descripcion marca precio imagen')
-        .limit(limit)
-        .skip(from)
-        .exec((err, products) => {
-            if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    err
-                });
-            }
-
-            Product.countDocuments({}, (err, count) => {
-
-                res.json({
-                    status: true,
-                    products,
-                    count
-                });
-            });
-
-        });
-});
 
 //Post Method (Update Product)
 app.post('/products', function (req, res) {
