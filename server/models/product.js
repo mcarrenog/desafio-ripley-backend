@@ -49,7 +49,7 @@ productSchema.plugin(uniqueValidator, {
 
 productSchema.plugin(mongoosastic, {
     hosts: [
-      process.env.URL_ELASTIC
+      process.env.FOUNDELASTICSEARCH_URL
     ]
   });
 
