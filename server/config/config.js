@@ -24,4 +24,4 @@ process.env.URL_DB = urlDB;
 // ========================================
 // ElasticSearch
 // ========================================
-process.env.URL_ELASTIC = process.env.URL_ELASTIC || 'localhost:9200';
+process.env.FOUNDELASTICSEARCH_URL = process.env.FOUNDELASTICSEARCH_URL || 'localhost:9200';
