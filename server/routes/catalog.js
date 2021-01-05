@@ -1,43 +1,126 @@
 const express = require('express');
 const Product = require('../models/product');
 const _ = require('underscore');
+const { result } = require('underscore');
 
-const { Client } = require('@elastic/elasticsearch');
-const client = new Client({ node: 'http://localhost:9200' });
+
 
 const app = express();
 
 
 
 
-//Get Method (Get all Products)
-app.get('/product', function(req, res) {
+//Get Method (Get Products by ID or marca or descripcion)
+app.get('/products', function (req, res) {
 
-    let from = req.query.from || 0;
-    let limit = req.query.limit || 5;
+    let search = req.query.search;
+    let idX = Number(search);
+    let applyDiscount = false;
+    let isNumeric = false;
+    if (idX) {
+        console.log('Es número');
+        isNumeric = true;
+    } else {
+        isNumeric = false;
+        console.log('es texto');
+        applyDiscount = isPalindrome(search);
+        console.log('Es palindromo(?): ', applyDiscount);
+    }
+    console.log("---------------");
+    console.dir(search);
+    console.log("---------------");
 
-    from = Number(from);
-    limit = Number(limit);
+    if (isNumeric) {
+        Product.search({
+            "query_string": {
+                "fields": ["id"],
+                "query": search,
+                "fuzziness": "AUTO"
+            }
+        }, {
 
-    Product.search({
-        query_string: {
-            query: "Play"
-        }
-    }, function(err, results) {
+            hydrateOptions: { select: ' id nombre marca descripcion imagen precio' }
+        },
+            function (err, results) {
 
-        if (err) {
-            return res.status(400).json({
-                ok: false,
-                err
+                if (err) {
+                    return res.status(400).json({
+                        ok: false,
+                        err
+                    });
+                }
+
+
+                res.json({
+                    status: true,
+                    results: results.hits.hits.map(x => x._source)
+                });
+
             });
-        }
+    }
+    else {
 
-        res.json({
-            status: true,
-            results
-        });
 
-    });
+        Product.search({
+            "multi_match": {
+                "fields": ["marca", "descripcion"],
+                "query": search,
+                "fuzziness": "AUTO"
+            }
+        }, {
+
+            hydrateOptions: { select: ' id nombre marca descripcion imagen precio' }
+        },
+            function (err, results) {
+
+                if (err) {
+                    return res.status(400).json({
+                        ok: false,
+                        err
+                    });
+                }
+
+                results.hits.hits.forEach((element, i) => {
+
+
+
+                    if (applyDiscount) {
+
+
+                        let { _source } = element;
+
+                        let { precio: price } = _source;
+                        console.log();
+                        price = (price) - (price * 0.2);
+                        element.precioDescuento = price;
+                        
+                        results.hits.hits[i].precioDescuento = price;
+                        console.log(results.hits.hits[i]);
+                       
+                    }
+                });
+
+                // let precio  = !applyDiscount ? results.hits.hits[0] :  results.hits.hits[0].precio - (results.hits.hits[0].precio * 0.2);
+                // results.hits.hits[0].precioDescuento = precio;
+
+                // console.log(results.hits.hits);
+                // console.log(precio);
+                // console.log(applyDiscount);
+                /*if (applyDiscount) {
+                    let { precio } = results.hits.hits[0];
+                    precio = (precio) - (precio * 0.2);
+                    results.hits.hits[0].precioDescuento = precio;
+                    console.log(precio);
+                    console.log(results.hits.hits);
+                }*/
+
+                res.json({
+                    status: true,
+                    results: results.hits.hits.map(x => x._source)
+                });
+
+            });
+    }
 
     /*Product.find({}, ' id nombre descripcion marca precio imagen')
         .limit(limit)
@@ -65,7 +148,7 @@ app.get('/product', function(req, res) {
 });
 
 //Get Method (Get all Products)
-app.get('/findProducts', function(req, res) {
+app.get('/findProducts', function (req, res) {
 
     let from = req.query.from || 0;
     let limit = req.query.limit || 5;
@@ -98,14 +181,14 @@ app.get('/findProducts', function(req, res) {
 });
 
 //Post Method (Update Product)
-app.post('/product', function(req, res) {
+app.post('/products', function (req, res) {
 
     let body = req.body;
 
     let product = new Product({
         id: body.id,
         marca: body.marca,
-        //imagen: body.imagen,
+        imagen: body.imagen,
         nombre: body.nombre,
         descripcion: body.descripcion,
         precio: body.precio
@@ -120,17 +203,29 @@ app.post('/product', function(req, res) {
             });
         }
 
-        res.json({
-            status: true,
-            product: productDB
+        product.on('es-indexed', (err, resultado) => {
+            if (err) {
+                return res.status(400).json({
+                    status: false,
+                    err
+                });
+            }
+
+            res.json({
+                status: true,
+                product: productDB
+            });
+
         });
+
+
 
     });
 
 
 });
 
-app.put('/product/:id', function(req, res) {
+app.put('/products/:id', function (req, res) {
 
     let id = req.params.id;
     let body = _.pick(req.body, ['marca', 'imagen', 'nombre', 'descripcion', 'precio']);
@@ -157,7 +252,7 @@ app.put('/product/:id', function(req, res) {
 
 });
 
-app.delete('/product/:id', function(req, res) {
+app.delete('/products/:id', function (req, res) {
 
     let id = req.params.id;
 
@@ -185,5 +280,16 @@ app.delete('/product/:id', function(req, res) {
 
 
 });
+
+function isPalindrome(text) {
+    text = text.replace(/ /g, "");
+
+    for (var i = 0; i < text.length; i++) {
+        if (text[i] != text[text.length - i - 1]) {
+            return false;
+        }
+    }
+    return true;
+}
 
 module.exports = app;

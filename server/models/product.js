@@ -9,7 +9,8 @@ let productSchema = new Schema({
     id: {
         unique: true,
         type: Number,
-        required: [true, 'El campo id es obligatorio']
+        required: [true, 'El campo id es obligatorio'],
+        es_indexed: true
     },
     marca: {
         type: String,
@@ -18,11 +19,15 @@ let productSchema = new Schema({
     },
     imagen: {
         type: String,
-        required: false
+        required: false,
+        es_indexed: true
+
     },
     nombre: {
         type: String,
-        required: [true, 'El campo Nombre es obligatorio']
+        required: [true, 'El campo Nombre es obligatorio'],
+        
+        es_indexed: true
 
     },
     descripcion: {
@@ -32,7 +37,13 @@ let productSchema = new Schema({
     },
     precio: {
         type: Number,
-        required: [true, 'El campo Precio es obligatorio']
+        required: [true, 'El campo Precio es obligatorio'],
+        es_indexed: true
+    },
+    precioDescuento: {
+        type: Number,
+        required: [false],
+        es_indexed: true
     }
 
 });
