@@ -47,6 +47,10 @@ productSchema.plugin(uniqueValidator, {
     message: '{PATH} debe ser único'
 });
 
-productSchema.plugin(mongoosastic);
+productSchema.plugin(mongoosastic, {
+    hosts: [
+      process.env.URL_ELASTIC
+    ]
+  });
 
 module.exports = mongoose.model('Product', productSchema);

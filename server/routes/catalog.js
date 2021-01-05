@@ -7,9 +7,6 @@ const { result } = require('underscore');
 
 const app = express();
 
-
-
-
 //Get Method (Get Products by ID or marca or descripcion)
 app.get('/products', function (req, res) {
 
@@ -17,18 +14,18 @@ app.get('/products', function (req, res) {
     let idX = Number(search);
     let applyDiscount = false;
     let isNumeric = false;
+
     if (idX) {
-        console.log('Es número');
+
         isNumeric = true;
     } else {
         isNumeric = false;
-        console.log('es texto');
+
         applyDiscount = isPalindrome(search);
-        console.log('Es palindromo(?): ', applyDiscount);
+
     }
-    console.log("---------------");
-    console.dir(search);
-    console.log("---------------");
+
+
 
     if (isNumeric) {
         Product.search({
@@ -61,6 +58,7 @@ app.get('/products', function (req, res) {
     else {
 
 
+
         Product.search({
             "multi_match": {
                 "fields": ["marca", "descripcion"],
@@ -69,7 +67,7 @@ app.get('/products', function (req, res) {
             }
         }, {
 
-            hydrateOptions: { select: ' id nombre marca descripcion imagen precio' }
+            hydrateOptions: { select: 'id nombre marca descripcion imagen precio' }
         },
             function (err, results) {
 
@@ -80,7 +78,7 @@ app.get('/products', function (req, res) {
                     });
                 }
 
-                results.hits.hits.forEach((element, i) => {
+                results.hits.hits.forEach((element,) => {
 
 
 
@@ -93,14 +91,14 @@ app.get('/products', function (req, res) {
                         console.log();
                         price = (price) - (price * 0.2);
                         _source.precioDescuento = price;
-                        
-                     //   results.hits.hits[i].precioDescuento = price;
-                        
-                       
+
+                        //   results.hits.hits[i].precioDescuento = price;
+
+
                     }
                 });
 
-             
+
 
                 res.json({
                     status: true,
@@ -110,7 +108,7 @@ app.get('/products', function (req, res) {
             });
     }
 
-   
+
 
 });
 
@@ -191,7 +189,7 @@ app.delete('/products/:id', function (req, res) {
 
     let id = req.params.id;
 
-    Product.findOneAndDelete({ id: id }, (err, productDeleted) => {
+    let cursor = Product.find({ id: id }, (err, productDeleted) => {
         if (err) {
             return res.status(400).json({
                 status: false,
@@ -207,11 +205,19 @@ app.delete('/products/:id', function (req, res) {
                 }
             });
         }
+
+
+        cursor.on('data', function (doc) {
+            doc.remove() ;
+        })
+        
         res.json({
             status: true,
             product: productDeleted
         });
-    });
+    }).cursor();
+
+  
 
 
 });

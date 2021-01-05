@@ -20,3 +20,8 @@ if (process.env.NODE_ENV === 'dev') {
 }
 
 process.env.URL_DB = urlDB;
+
+// ========================================
+// ElasticSearch
+// ========================================
+process.env.URL_ELASTIC = process.env.URL_ELASTIC || 'localhost:9200';
