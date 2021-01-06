@@ -26,7 +26,7 @@ let productSchema = new Schema({
     nombre: {
         type: String,
         required: [true, 'El campo Nombre es obligatorio'],
-        
+
         es_indexed: true
 
     },
@@ -49,8 +49,8 @@ productSchema.plugin(uniqueValidator, {
 
 productSchema.plugin(mongoosastic, {
     hosts: [
-      process.env.ELASTICSEARCH_URL
+        process.env.ELASTICSEARCH_URL
     ]
-  });
+});
 
 module.exports = mongoose.model('Product', productSchema);

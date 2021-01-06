@@ -1,19 +1,33 @@
 const express = require('express');
 const Product = require('../models/product');
 const _ = require('underscore');
-const { result } = require('underscore');
+
+
 
 
 
 const app = express();
+const cors = require('cors');
+
+
+
+
+app.use(express.json({limit: '50mb', extended: true}));
+app.use(express.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
+
+app.use(cors());
+app.options('*', cors());
 
 //Get Method (Get Products by ID or marca or descripcion)
 app.get('/products', function (req, res) {
+
 
     let search = req.query.search;
     let idX = Number(search);
     let applyDiscount = false;
     let isNumeric = false;
+
+    console.log('buscando: ', search);
 
     if (idX) {
 
@@ -24,8 +38,6 @@ app.get('/products', function (req, res) {
         applyDiscount = isPalindrome(search);
 
     }
-
-
 
     if (isNumeric) {
         Product.search({
@@ -98,8 +110,6 @@ app.get('/products', function (req, res) {
                     }
                 });
 
-
-
                 res.json({
                     status: true,
                     results: results.hits.hits.map(x => x._source)
@@ -107,16 +117,45 @@ app.get('/products', function (req, res) {
 
             });
     }
+});
 
+app.get('/getAllProducts', function (req, res) {
+
+
+
+    Product.find({})
+
+        .exec((err, products) => {
+
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+
+
+
+            res.json({
+                status: true,
+                products
+            });
+
+
+
+
+        });
 
 
 });
 
 
-//Post Method (Update Product)
+//Post Method (Insert Product)
 app.post('/products', function (req, res) {
 
     let body = req.body;
+
+    console.log('body', body.id);
 
     let product = new Product({
         id: body.id,
@@ -126,6 +165,8 @@ app.post('/products', function (req, res) {
         descripcion: body.descripcion,
         precio: body.precio
     });
+
+    console.log(product);
 
     product.save((err, productDB) => {
 
@@ -208,16 +249,16 @@ app.delete('/products/:id', function (req, res) {
 
 
         cursor.on('data', function (doc) {
-            doc.remove() ;
+            doc.remove();
         })
-        
+
         res.json({
             status: true,
             product: productDeleted
         });
     }).cursor();
 
-  
+
 
 
 });
